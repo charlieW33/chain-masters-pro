@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { AuthScreen, useAuth } from "./auth.jsx";
+import { auth, leagues as leaguesApi, members as membersApi, rosters as rostersApi, getCurrentUser } from "./supabase.js";
 
 // ── THEME ───────────────────────────────────────────────────────────────
 const T = {
@@ -2715,16 +2717,56 @@ function LeagueHistoryPage({ league }) {
 
 // ── ROOT APP ──────────────────────────────────────────────────────────────
 export default function App() {
+  const { user, setUser, signOut } = useAuth();
   const [screen, setScreen] = useState("landing");
   const [league, setLeague] = useState(null);
   const [waiverPool, setWaiverPool] = useState([]);
   const [leagueCpuTeams, setLeagueCpuTeams] = useState([]);
   const [page, setPage] = useState("home");
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [playerProfile, setPlayerProfile] = useState(null); // player to show profile for
+  const [playerProfile, setPlayerProfile] = useState(null);
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState("");
 
-  const handleLeagueCreated = (info) => {
+  // ── Auth handlers ──────────────────────────────────────────────────────
+  const handleSignUp = async (email, password, username) => {
+    setAuthLoading(true); setAuthError("");
+    try {
+      await auth.signUp(email, password, username);
+      setAuthError("✓ Check your email to confirm your account, then sign in.");
+    } catch(e) { setAuthError(e.message); }
+    finally { setAuthLoading(false); }
+  };
+
+  const handleSignIn = async (email, password) => {
+    setAuthLoading(true); setAuthError("");
+    try {
+      await auth.signIn(email, password);
+      setUser(getCurrentUser());
+    } catch(e) { setAuthError(e.message); }
+    finally { setAuthLoading(false); }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    setScreen("landing");
+    setLeague(null);
+  };
+
+  // ── League handlers ────────────────────────────────────────────────────
+  const handleLeagueCreated = async (info) => {
     setLeague({ ...info, roster: [] });
+    // Save to Supabase if user is logged in
+    if (user) {
+      try {
+        const inviteCode = Math.random().toString(36).slice(2,8).toUpperCase();
+        const lg = await leaguesApi.create(
+          info.leagueName, user.id, info.settings, info.draftSettings ?? {}
+        );
+        const member = await membersApi.join(lg.id, user.id, info.teamName);
+        setLeague(prev => ({ ...prev, supabaseId: lg.id, memberId: member.id, inviteCode: lg.invite_code }));
+      } catch(e) { console.warn("Supabase save failed, continuing offline:", e.message); }
+    }
     if (info.draftSettings?.draftType === "salary") {
       setScreen("salaryDraft");
     } else {
@@ -2732,11 +2774,40 @@ export default function App() {
     }
   };
 
-  const handleDraftComplete = (myRoster, remainingPool) => {
+  const handleJoinLeague = async (inviteCode, teamName) => {
+    if (!user) return;
+    try {
+      const lg = await leaguesApi.getByInviteCode(inviteCode);
+      const member = await membersApi.join(lg.id, user.id, teamName);
+      setLeague({
+        leagueName: lg.name,
+        teamName,
+        yourName: user.email,
+        settings: lg.settings,
+        draftSettings: lg.draft_settings,
+        roster: [],
+        supabaseId: lg.id,
+        memberId: member.id,
+        inviteCode: lg.invite_code,
+      });
+      setScreen("app");
+      setPage("home");
+    } catch(e) { throw new Error("League not found. Check your invite code."); }
+  };
+
+  const handleDraftComplete = async (myRoster, remainingPool) => {
     const startersPerWeek = league?.settings?.startersPerWeek ?? 5;
     const rosterWithStarters = myRoster.map((p, i) => ({ ...p, starter: i < startersPerWeek }));
     setLeague(prev => ({ ...prev, roster: rosterWithStarters }));
     setWaiverPool(remainingPool);
+    // Save roster to Supabase
+    if (league?.supabaseId && league?.memberId) {
+      try {
+        for (const p of rosterWithStarters) {
+          await rostersApi.addPlayer(league.memberId, league.supabaseId, p.id, p.name, "draft");
+        }
+      } catch(e) { console.warn("Roster save failed:", e.message); }
+    }
     setScreen("app");
     setPage("home");
   };
@@ -2761,7 +2832,25 @@ export default function App() {
     });
   };
 
-  if (screen === "landing") return <LandingPage onLeagueCreated={handleLeagueCreated} />;
+  // ── Show auth screen if not logged in ─────────────────────────────────
+  if (!user) return (
+    <AuthScreen
+      onAuthed={setUser}
+      loading={authLoading}
+      error={authError}
+      onSignIn={handleSignIn}
+      onSignUp={handleSignUp}
+    />
+  );
+
+  if (screen === "landing") return (
+    <LandingPage
+      onLeagueCreated={handleLeagueCreated}
+      onJoinLeague={handleJoinLeague}
+      user={user}
+      onSignOut={handleSignOut}
+    />
+  );
   if (screen === "draft") return <DraftRoom league={league} onDraftComplete={handleDraftComplete} onCpuTeamsReady={handleSetCpuTeams} />;
   if (screen === "salaryDraft") return <SalaryDraftRoom league={league} onDraftComplete={handleDraftComplete} onCpuTeamsReady={handleSetCpuTeams} />;
 

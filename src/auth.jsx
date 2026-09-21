@@ -30,48 +30,63 @@ const Btn = ({ children, onClick, style = {}, outline = false, loading = false }
 // ─────────────────────────────────────────────────────────────
 // AUTH SCREEN — Sign Up / Sign In / Forgot Password
 // ─────────────────────────────────────────────────────────────
-export function AuthScreen({ onAuthed }) {
+export function AuthScreen({ onAuthed, onSignIn, onSignUp, loading: extLoading, error: extError }) {
   const [mode, setMode]       = useState("signin"); // signin | signup | forgot
   const [email, setEmail]     = useState("");
   const [password, setPass]   = useState("");
   const [username, setUser]   = useState("");
-  const [error, setError]     = useState("");
+  const [localError, setLocalError] = useState("");
   const [info, setInfo]       = useState("");
-  const [loading, setLoading] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false);
+
+  const loading = extLoading || localLoading;
+  const error = localError || (extError && !extError.startsWith("✓") ? extError : "");
+  if (extError?.startsWith("✓") && !info) setInfo(extError);
 
   const handleSignUp = async () => {
     if (!username.trim() || !email.trim() || !password.trim())
-      return setError("Please fill in all fields.");
+      return setLocalError("Please fill in all fields.");
     if (password.length < 6)
-      return setError("Password must be at least 6 characters.");
-    setError(""); setLoading(true);
-    try {
-      await auth.signUp(email.trim(), password, username.trim());
-      setInfo("Check your email to confirm your account, then sign in.");
+      return setLocalError("Password must be at least 6 characters.");
+    setLocalError("");
+    if (onSignUp) {
+      await onSignUp(email.trim(), password, username.trim());
       setMode("signin");
-    } catch (e) { setError(e.message); }
-    finally { setLoading(false); }
+    } else {
+      setLocalLoading(true);
+      try {
+        await auth.signUp(email.trim(), password, username.trim());
+        setInfo("Check your email to confirm your account, then sign in.");
+        setMode("signin");
+      } catch (e) { setLocalError(e.message); }
+      finally { setLocalLoading(false); }
+    }
   };
 
   const handleSignIn = async () => {
-    if (!email.trim() || !password.trim()) return setError("Please fill in all fields.");
-    setError(""); setLoading(true);
-    try {
-      await auth.signIn(email.trim(), password);
-      onAuthed(getCurrentUser());
-    } catch (e) { setError(e.message); }
-    finally { setLoading(false); }
+    if (!email.trim() || !password.trim()) return setLocalError("Please fill in all fields.");
+    setLocalError("");
+    if (onSignIn) {
+      await onSignIn(email.trim(), password);
+    } else {
+      setLocalLoading(true);
+      try {
+        await auth.signIn(email.trim(), password);
+        onAuthed?.(getCurrentUser());
+      } catch (e) { setLocalError(e.message); }
+      finally { setLocalLoading(false); }
+    }
   };
 
   const handleForgot = async () => {
-    if (!email.trim()) return setError("Enter your email first.");
-    setError(""); setLoading(true);
+    if (!email.trim()) return setLocalError("Enter your email first.");
+    setLocalError(""); setLocalLoading(true);
     try {
       await auth.resetPassword(email.trim());
       setInfo("Password reset email sent! Check your inbox.");
       setMode("signin");
-    } catch (e) { setError(e.message); }
-    finally { setLoading(false); }
+    } catch (e) { setLocalError(e.message); }
+    finally { setLocalLoading(false); }
   };
 
   return (
