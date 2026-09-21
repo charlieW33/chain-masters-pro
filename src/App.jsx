@@ -276,6 +276,7 @@ function LandingPage({ onLeagueCreated }) {
     width: "100%", padding: "13px 14px", borderRadius: 12,
     border: `1.5px solid ${T.border}`, fontSize: 15, marginBottom: 12,
     boxSizing: "border-box", background: "#fff", outline: "none", fontFamily: "inherit",
+    color: "#1a1a1a", WebkitTextFillColor: "#1a1a1a", opacity: 1,
   };
 
   const handleCreate = () => {
@@ -438,7 +439,7 @@ function DraftSetupScreen({ leagueName, teamName, settings, onBack, onConfirm })
     width: "100%", padding: "13px 14px", borderRadius: 12,
     border: `1.5px solid ${T.border}`, fontSize: 15, marginBottom: 0,
     boxSizing: "border-box", background: "#fff", outline: "none", fontFamily: "inherit",
-    color: T.text,
+    color: "#1a1a1a", WebkitTextFillColor: "#1a1a1a", opacity: 1,
   };
 
   const handleConfirm = () => {
