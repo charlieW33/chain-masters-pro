@@ -443,10 +443,8 @@ function DraftSetupScreen({ leagueName, teamName, settings, onBack, onConfirm })
   };
 
   const handleConfirm = () => {
-    if (!draftDate) return setError("Please pick a draft date.");
-    if (!draftTime) return setError("Please pick a draft time.");
     setError("");
-    onConfirm({ draftType, salaryBudget, pickTimer, draftDate, draftTime });
+    onConfirm({ draftType, salaryBudget, pickTimer, draftDate: draftDate || "TBD", draftTime: draftTime || "TBD" });
   };
 
   // Format the scheduled time nicely for preview
