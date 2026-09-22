@@ -93,8 +93,8 @@ export function AuthScreen({ onAuthed, onSignIn, onSignUp, loading: extLoading, 
     <div style={{ minHeight: "100vh", background: T.darkGreen, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24 }}>
       <div style={{ textAlign: "center", marginBottom: 32 }}>
         <div style={{ fontSize: 64, marginBottom: 10 }}>⚔️</div>
-        <h1 style={{ color: "#fff", fontSize: 30, fontFamily: "'Georgia',serif", margin: "0 0 6px" }}>Chain Masters Pro</h1>
-        <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, margin: 0 }}>Fantasy Disc Golf Pro Tour 2026</p>
+        <h1 style={{ color: "#fff", fontSize: 30, fontFamily: "'Georgia',serif", margin: "0 0 6px" }}>Warrior Fantasy DG</h1>
+        <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, margin: 0 }}>Draft. Compete. Conquer.</p>
       </div>
 
       <div style={{ background: T.card, borderRadius: 20, padding: 24, width: "100%", maxWidth: 380 }}>

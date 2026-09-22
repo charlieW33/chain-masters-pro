@@ -4,107 +4,137 @@ import { auth, leagues as leaguesApi, members as membersApi, rosters as rostersA
 
 // ── THEME ───────────────────────────────────────────────────────────────
 const T = {
-  darkGreen: "#1a2e1a", green: "#2d5a2d", lightGreen: "#e8f0e8",
-  accent: "#c9a84c", red: "#c0392b", text: "#1a1a1a", subtext: "#666",
-  bg: "#f0f2f0", card: "#ffffff", border: "#e0e8e0",
+  // Warrior Fantasy DG brand colors
+  darkGreen: "#0A1D36",   // Navy (primary dark)
+  green: "#1E4B8C",       // Royal Blue (primary)
+  lightGreen: "#e8eef7",  // Light blue tint
+  accent: "#D4AF37",      // Gold
+  red: "#c0392b",         // Red (errors/drops)
+  text: "#0A1D36",        // Navy text
+  subtext: "#5a6a7a",     // Muted blue-grey
+  bg: "#f0f3f8",          // Light blue-grey bg
+  card: "#ffffff",        // White cards
+  border: "#d8e2f0",      // Blue-tinted border
 };
 
 // ── 2026 DGPT DATA ──────────────────────────────────────────────────────
+// ── 2027 DGPT SEASON DATA ────────────────────────────────────────────────
+// Fantasy season ends after USDGC (Oct 7–10). Playoffs at Ivy Hill,
+// KC Wide Open, and Powerball Cup in Austin come AFTER USDGC — not counted.
+// Source: dgpt.com/announcements/2027-season-schedule
+
 const COMPLETED = [
-  { name: "Supreme Flight Open",  location: "Brooksville, FL",      dates: "Feb 27–Mar 1", winner: "Ricky Wysocki",  score: -24 },
-  { name: "MVP Big Easy Open",    location: "Jefferson Parish, LA",  dates: "Mar 13–15",    winner: "Gannon Buhr",    score: -11 },
-  { name: "Queen City Classic",   location: "Charlotte, NC",         dates: "Mar 27–29",    winner: "Gannon Buhr",    score: -23 },
-  { name: "PDGA Champions Cup",   location: "Lynchburg, VA",         dates: "Apr 9–12",     winner: "Niklas Anttila", score: -27 },
-  { name: "Jonesboro Open",       location: "Jonesboro, AR",         dates: "Apr 17–19",    winner: "Gannon Buhr",    score: -31 },
-  { name: "KC Wide Open",         location: "Liberty, MO",           dates: "Apr 24–26",    winner: "Cole Redalen",   score: -23 },
-  { name: "WACO",                 location: "Waco, TX",              dates: "May 1–3",      winner: "Emerson Keith",  score: -29 },
-  { name: "Open at Austin",       location: "Austin, TX",            dates: "May 7–10",     winner: "Paul Ulibarri",  score: -36 },
-  { name: "OTB Open",             location: "Stockton, CA",          dates: "May 21–24",    winner: "Calvin Heimburg",score: -37 },
+  // No events completed yet — 2027 season starts March 2027
 ];
 
 const UPCOMING = [
-  { name: "Northwest Championship", location: "Portland, OR",     dates: "Jun 4–7",      tier: "DGPT",    status: "live" },
-  { name: "European Open",          location: "Tallinn, Estonia", dates: "Jun 18–21",    tier: "Major",   status: "upcoming" },
-  { name: "Swedish Open",           location: "Borås, Sweden",    dates: "Jun 26–28",    tier: "DGPT+",   status: "upcoming" },
-  { name: "Ledgestone Open",        location: "Peoria, IL",       dates: "Jul 30–Aug 2", tier: "DGPT",    status: "upcoming" },
-  { name: "PDGA Pro Worlds",        location: "Milford, MI",      dates: "Aug 26–30",    tier: "Major",   status: "upcoming" },
-  { name: "USDGC",                  location: "Rock Hill, SC",    dates: "Oct 8–11",     tier: "Major",   status: "upcoming" },
-  { name: "Powerball Cup",          location: "Lynchburg, VA",    dates: "Oct 15–18",    tier: "Playoff", status: "upcoming" },
+  // ── JomezPro Series (optional — toggle in league settings) ──
+  { name: "Greater Atlanta Open",          location: "Conyers, GA",              dates: "Feb 26–28",   tier: "JomezPro", status: "upcoming" },
+  // ── DGPT Elite Series ──
+  { name: "Supreme Flight Open",           location: "Brooksville, FL",          dates: "Mar 12–14",   tier: "DGPT",     status: "upcoming" },
+  { name: "Big Easy Open",                 location: "Jefferson Parish, LA",     dates: "Mar 19–21",   tier: "DGPT",     status: "upcoming" },
+  { name: "Queen City Classic",            location: "Charlotte, NC",            dates: "Apr 2–4",     tier: "DGPT",     status: "upcoming" },
+  { name: "Blue Ridge Championship",       location: "Marion, NC",               dates: "Apr 9–11",    tier: "JomezPro", status: "upcoming" },
+  { name: "PDGA Champions Cup",            location: "Lynchburg, VA",            dates: "Apr 15–18",   tier: "Major",    status: "upcoming" },
+  { name: "Tulsa Open at POSTOAK",         location: "Tulsa, OK",               dates: "Apr 23–25",   tier: "JomezPro", status: "upcoming" },
+  { name: "Open at Austin",               location: "Austin, TX",               dates: "Apr 29–May 2",tier: "DGPT+",    status: "upcoming" },
+  { name: "Morley Field Classic",          location: "San Diego, CA",            dates: "May 14–16",   tier: "JomezPro", status: "upcoming" },
+  { name: "OTB Open",                      location: "Stockton, CA",             dates: "May 20–23",   tier: "DGPT+",    status: "upcoming" },
+  { name: "Redwood Open at Brooktrails",   location: "Willits, CA",              dates: "May 28–30",   tier: "JomezPro", status: "upcoming" },
+  { name: "Cascade Challenge",             location: "Shelton, WA",              dates: "Jun 4–6",     tier: "DGPT",     status: "upcoming" },
+  { name: "PDGA Pro World Championships", location: "Portland, OR",             dates: "Jun 16–20",   tier: "Major",    status: "upcoming" },
+  { name: "European Disc Golf Festival",   location: "Tallinn, Estonia",         dates: "Jul 9–11",    tier: "DGPT",     status: "upcoming" },
+  { name: "European Open",                 location: "Ale, Sweden",              dates: "Jul 22–25",   tier: "Major",    status: "upcoming" },
+  { name: "Eagles Crossing Open",          location: "Hawk Point, MO",           dates: "Jul 30–Aug 1",tier: "JomezPro", status: "upcoming" },
+  { name: "Great Lakes Open",             location: "Milford, MI",              dates: "Aug 26–29",   tier: "DGPT+",    status: "upcoming" },
+  { name: "LWS Open at Idlewild",         location: "Burlington, KY",           dates: "Sep 3–5",     tier: "DGPT",     status: "upcoming" },
+  { name: "Greater Toronto Open",          location: "Milton, ON, Canada",       dates: "Sep 10–12",   tier: "JomezPro", status: "upcoming" },
+  { name: "Green Mountain Championships", location: "Jeffersonville, VT",       dates: "Sep 16–19",   tier: "Playoff",  status: "upcoming" },
+  { name: "MVP Open x OTB",               location: "Leicester, MA",            dates: "Sep 23–26",   tier: "Playoff",  status: "upcoming" },
+  // ── CHAMPIONSHIP FINALS (fantasy season ends here) ──
+  { name: "USDGC",                         location: "Rock Hill, SC",            dates: "Oct 7–10",    tier: "Major",    status: "upcoming" },
+];
+
+// Events AFTER USDGC — not counted in fantasy season
+const POST_SEASON_2027 = [
+  { name: "DGPT Playoffs at Ivy Hill",     location: "Lynchburg, VA",            dates: "Oct 14–17",   tier: "Playoff" },
+  { name: "Kansas City Wide Open",         location: "Liberty, MO",              dates: "Oct 21–24",   tier: "Playoff" },
+  { name: "Powerball Cup",                 location: "Austin, TX",               dates: "TBD",         tier: "Playoff" },
 ];
 
 // Full draftable player pool — 60 real DGPT MPO pros with 2026 stats
 const ALL_PLAYERS = [
-  { id:1,  name:"Gannon Buhr",        ini:"GB",  div:"MPO", rating:1055, wins:3, top5:6, events:9, total:98,  avg:10.9 },
-  { id:2,  name:"Calvin Heimburg",    ini:"CH",  div:"MPO", rating:1052, wins:1, top5:5, events:9, total:79,  avg:8.8  },
-  { id:3,  name:"Ricky Wysocki",      ini:"RW",  div:"MPO", rating:1058, wins:1, top5:4, events:8, total:72,  avg:9.0  },
-  { id:4,  name:"Cole Redalen",       ini:"CR",  div:"MPO", rating:1042, wins:1, top5:4, events:9, total:64,  avg:7.1  },
-  { id:5,  name:"Paul Ulibarri",      ini:"PU",  div:"MPO", rating:1041, wins:1, top5:3, events:8, total:61,  avg:7.6  },
-  { id:6,  name:"Niklas Anttila",     ini:"NA",  div:"MPO", rating:1048, wins:1, top5:4, events:9, total:58,  avg:6.4  },
-  { id:7,  name:"Emerson Keith",      ini:"EK",  div:"MPO", rating:1039, wins:1, top5:3, events:9, total:55,  avg:6.1  },
-  { id:8,  name:"Paul McBeth",        ini:"PM",  div:"MPO", rating:1049, wins:0, top5:4, events:9, total:48,  avg:5.3  },
-  { id:9,  name:"Chris Dickerson",    ini:"CD",  div:"MPO", rating:1046, wins:0, top5:3, events:9, total:42,  avg:4.7  },
-  { id:10, name:"Eagle McMahon",      ini:"EM",  div:"MPO", rating:1044, wins:0, top5:2, events:7, total:31,  avg:4.4  },
-  { id:11, name:"Anthony Barela",     ini:"AB",  div:"MPO", rating:1043, wins:0, top5:3, events:9, total:29,  avg:3.2  },
-  { id:12, name:"Adam Hammes",        ini:"AH",  div:"MPO", rating:1041, wins:0, top5:2, events:8, total:25,  avg:3.1  },
-  { id:13, name:"Ezra Aderhold",      ini:"EA",  div:"MPO", rating:1038, wins:0, top5:2, events:9, total:22,  avg:2.4  },
-  { id:14, name:"Aaron Gossage",      ini:"AG",  div:"MPO", rating:1044, wins:0, top5:2, events:7, total:21,  avg:3.0  },
-  { id:15, name:"James Conrad",       ini:"JC",  div:"MPO", rating:1040, wins:0, top5:1, events:8, total:18,  avg:2.3  },
-  { id:16, name:"Isaac Robinson",     ini:"IR",  div:"MPO", rating:1036, wins:0, top5:1, events:9, total:16,  avg:1.8  },
-  { id:17, name:"Garrett Gurthie",    ini:"GG",  div:"MPO", rating:1033, wins:0, top5:1, events:8, total:14,  avg:1.8  },
-  { id:18, name:"Corey Ellis",        ini:"CE",  div:"MPO", rating:1037, wins:0, top5:1, events:9, total:13,  avg:1.4  },
-  { id:19, name:"Kyle Klein",         ini:"KK",  div:"MPO", rating:1035, wins:0, top5:1, events:7, total:12,  avg:1.7  },
-  { id:20, name:"Sullivan Tipton",    ini:"ST",  div:"MPO", rating:1031, wins:0, top5:0, events:8, total:8,   avg:1.0  },
-  { id:21, name:"Joel Freeman",       ini:"JF",  div:"MPO", rating:1029, wins:0, top5:0, events:6, total:7,   avg:1.2  },
-  { id:22, name:"Andrew Marwede",     ini:"AM",  div:"MPO", rating:1028, wins:0, top5:0, events:7, total:6,   avg:0.9  },
-  { id:23, name:"Braeden Sides",      ini:"BS",  div:"MPO", rating:1025, wins:0, top5:0, events:5, total:5,   avg:1.0  },
-  { id:24, name:"Casey White",        ini:"CW2", div:"MPO", rating:1022, wins:0, top5:0, events:6, total:4,   avg:0.7  },
-  { id:25, name:"Kevin Jones",        ini:"KJ",  div:"MPO", rating:1030, wins:0, top5:0, events:7, total:6,   avg:0.9  },
-  { id:26, name:"Drew Gibson",        ini:"DG",  div:"MPO", rating:1038, wins:0, top5:1, events:5, total:9,   avg:1.8  },
-  { id:27, name:"Alden Harris",       ini:"AH2", div:"MPO", rating:1026, wins:0, top5:0, events:6, total:4,   avg:0.7  },
-  { id:28, name:"Matt Bell",          ini:"MB",  div:"MPO", rating:1024, wins:0, top5:0, events:5, total:3,   avg:0.6  },
-  { id:29, name:"Grady Shue",         ini:"GS",  div:"MPO", rating:1020, wins:0, top5:0, events:4, total:2,   avg:0.5  },
-  { id:30, name:"Cale Leiviska",      ini:"CL",  div:"MPO", rating:1019, wins:0, top5:0, events:4, total:2,   avg:0.5  },
-  { id:31, name:"Simon Lizotte",      ini:"SL",  div:"MPO", rating:1045, wins:0, top5:2, events:6, total:19,  avg:3.2  },
-  { id:32, name:"Seppo Paju",         ini:"SP",  div:"MPO", rating:1038, wins:0, top5:1, events:5, total:11,  avg:2.2  },
-  { id:33, name:"Väinö Mäkelä",       ini:"VM",  div:"MPO", rating:1036, wins:0, top5:1, events:6, total:10,  avg:1.7  },
-  { id:34, name:"Chris Clemons",      ini:"CC",  div:"MPO", rating:1032, wins:0, top5:0, events:7, total:8,   avg:1.1  },
-  { id:35, name:"Nate Sexton",        ini:"NS",  div:"MPO", rating:1034, wins:0, top5:0, events:6, total:7,   avg:1.2  },
-  { id:36, name:"Philo Brathwaite",   ini:"PB",  div:"MPO", rating:1033, wins:0, top5:0, events:7, total:6,   avg:0.9  },
-  { id:37, name:"Wysocki Ricky",      ini:"WR",  div:"MPO", rating:1031, wins:0, top5:0, events:5, total:5,   avg:1.0  },
-  { id:38, name:"Michael Johansen",   ini:"MJ",  div:"MPO", rating:1029, wins:0, top5:0, events:6, total:5,   avg:0.8  },
-  { id:39, name:"Kristin Tattar",     ini:"KT",  div:"FPO", rating:1010, wins:2, top5:5, events:8, total:62,  avg:7.8  },
-  { id:40, name:"Catrina Allen",      ini:"CA",  div:"FPO", rating:1005, wins:1, top5:4, events:8, total:44,  avg:5.5  },
-  { id:41, name:"Ohn Scoggins",       ini:"OS",  div:"FPO", rating:998,  wins:1, top5:3, events:7, total:38,  avg:5.4  },
-  { id:42, name:"Hailey King",        ini:"HK",  div:"FPO", rating:995,  wins:0, top5:4, events:8, total:29,  avg:3.6  },
-  { id:43, name:"Paige Pierce",       ini:"PP",  div:"FPO", rating:1002, wins:0, top5:3, events:7, total:26,  avg:3.7  },
-  { id:44, name:"Missy Gannon",       ini:"MG",  div:"FPO", rating:990,  wins:0, top5:2, events:8, total:18,  avg:2.3  },
-  { id:45, name:"Valerie Mandujano",  ini:"VM2", div:"FPO", rating:988,  wins:0, top5:2, events:7, total:15,  avg:2.1  },
-  { id:46, name:"Ella Hansen",        ini:"EH",  div:"FPO", rating:985,  wins:0, top5:1, events:6, total:11,  avg:1.8  },
-  { id:47, name:"Sarah Hokom",        ini:"SH",  div:"FPO", rating:987,  wins:0, top5:1, events:7, total:10,  avg:1.4  },
-  { id:48, name:"Eveliina Salonen",   ini:"ES",  div:"FPO", rating:992,  wins:0, top5:2, events:6, total:14,  avg:2.3  },
-  { id:49, name:"Natalie Ryan",       ini:"NR",  div:"FPO", rating:983,  wins:0, top5:1, events:6, total:9,   avg:1.5  },
-  { id:50, name:"Madison Walker",     ini:"MW",  div:"FPO", rating:980,  wins:0, top5:0, events:5, total:5,   avg:1.0  },
-  { id:51, name:"Reid Frescura",      ini:"RF",  div:"MPO", rating:1027, wins:0, top5:0, events:5, total:4,   avg:0.8  },
-  { id:52, name:"Gregg Barsby",       ini:"GB2", div:"MPO", rating:1030, wins:0, top5:0, events:6, total:5,   avg:0.8  },
-  { id:53, name:"Paul McFlurry",      ini:"PM2", div:"MPO", rating:1023, wins:0, top5:0, events:4, total:3,   avg:0.8  },
-  { id:54, name:"Bradley Williams",   ini:"BW",  div:"MPO", rating:1025, wins:0, top5:0, events:5, total:4,   avg:0.8  },
-  { id:55, name:"Thomas Gilbert",     ini:"TG",  div:"MPO", rating:1022, wins:0, top5:0, events:5, total:3,   avg:0.6  },
-  { id:56, name:"Chris Clemons Jr",   ini:"CC2", div:"MPO", rating:1020, wins:0, top5:0, events:4, total:3,   avg:0.8  },
-  { id:57, name:"Nathan Queen",       ini:"NQ",  div:"MPO", rating:1018, wins:0, top5:0, events:4, total:2,   avg:0.5  },
-  { id:58, name:"Jordan Castro",      ini:"JCa", div:"MPO", rating:1017, wins:0, top5:0, events:4, total:2,   avg:0.5  },
-  { id:59, name:"Eric Oakley",        ini:"EO",  div:"MPO", rating:1028, wins:0, top5:0, events:5, total:4,   avg:0.8  },
-  { id:60, name:"Terry Rothlisberger",ini:"TR",  div:"MPO", rating:1016, wins:0, top5:0, events:3, total:1,   avg:0.3  },
+  { id:1,  name:"Gannon Buhr",        ini:"GB",  div:"MPO", rating:1055, wins:0, top5:0, events:0, total:0,  avg:0.0 },
+  { id:2,  name:"Calvin Heimburg",    ini:"CH",  div:"MPO", rating:1052, wins:0, top5:0, events:0, total:0,  avg:0.0 },
+  { id:3,  name:"Ricky Wysocki",      ini:"RW",  div:"MPO", rating:1058, wins:0, top5:0, events:0, total:0,  avg:0.0 },
+  { id:4,  name:"Cole Redalen",       ini:"CR",  div:"MPO", rating:1042, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:5,  name:"Paul Ulibarri",      ini:"PU",  div:"MPO", rating:1041, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:6,  name:"Niklas Anttila",     ini:"NA",  div:"MPO", rating:1048, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:7,  name:"Emerson Keith",      ini:"EK",  div:"MPO", rating:1039, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:8,  name:"Paul McBeth",        ini:"PM",  div:"MPO", rating:1049, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:9,  name:"Chris Dickerson",    ini:"CD",  div:"MPO", rating:1046, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:10, name:"Eagle McMahon",      ini:"EM",  div:"MPO", rating:1044, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:11, name:"Anthony Barela",     ini:"AB",  div:"MPO", rating:1043, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:12, name:"Adam Hammes",        ini:"AH",  div:"MPO", rating:1041, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:13, name:"Ezra Aderhold",      ini:"EA",  div:"MPO", rating:1038, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:14, name:"Aaron Gossage",      ini:"AG",  div:"MPO", rating:1044, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:15, name:"James Conrad",       ini:"JC",  div:"MPO", rating:1040, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:16, name:"Isaac Robinson",     ini:"IR",  div:"MPO", rating:1036, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:17, name:"Garrett Gurthie",    ini:"GG",  div:"MPO", rating:1033, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:18, name:"Corey Ellis",        ini:"CE",  div:"MPO", rating:1037, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:19, name:"Kyle Klein",         ini:"KK",  div:"MPO", rating:1035, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:20, name:"Sullivan Tipton",    ini:"ST",  div:"MPO", rating:1031, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:21, name:"Joel Freeman",       ini:"JF",  div:"MPO", rating:1029, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:22, name:"Andrew Marwede",     ini:"AM",  div:"MPO", rating:1028, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:23, name:"Braeden Sides",      ini:"BS",  div:"MPO", rating:1025, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:24, name:"Casey White",        ini:"CW2", div:"MPO", rating:1022, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:25, name:"Kevin Jones",        ini:"KJ",  div:"MPO", rating:1030, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:26, name:"Drew Gibson",        ini:"DG",  div:"MPO", rating:1038, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:27, name:"Alden Harris",       ini:"AH2", div:"MPO", rating:1026, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:28, name:"Matt Bell",          ini:"MB",  div:"MPO", rating:1024, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:29, name:"Grady Shue",         ini:"GS",  div:"MPO", rating:1020, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:30, name:"Cale Leiviska",      ini:"CL",  div:"MPO", rating:1019, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:31, name:"Simon Lizotte",      ini:"SL",  div:"MPO", rating:1045, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:32, name:"Seppo Paju",         ini:"SP",  div:"MPO", rating:1038, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:33, name:"Väinö Mäkelä",       ini:"VM",  div:"MPO", rating:1036, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:34, name:"Chris Clemons",      ini:"CC",  div:"MPO", rating:1032, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:35, name:"Nate Sexton",        ini:"NS",  div:"MPO", rating:1034, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:36, name:"Philo Brathwaite",   ini:"PB",  div:"MPO", rating:1033, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:37, name:"Wysocki Ricky",      ini:"WR",  div:"MPO", rating:1031, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:38, name:"Michael Johansen",   ini:"MJ",  div:"MPO", rating:1029, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:39, name:"Kristin Tattar",     ini:"KT",  div:"FPO", rating:1010, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:40, name:"Catrina Allen",      ini:"CA",  div:"FPO", rating:1005, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:41, name:"Ohn Scoggins",       ini:"OS",  div:"FPO", rating:998,  wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:42, name:"Hailey King",        ini:"HK",  div:"FPO", rating:995,  wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:43, name:"Paige Pierce",       ini:"PP",  div:"FPO", rating:1002, wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:44, name:"Missy Gannon",       ini:"MG",  div:"FPO", rating:990,  wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:45, name:"Valerie Mandujano",  ini:"VM2", div:"FPO", rating:988,  wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:46, name:"Ella Hansen",        ini:"EH",  div:"FPO", rating:985,  wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:47, name:"Sarah Hokom",        ini:"SH",  div:"FPO", rating:987,  wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:48, name:"Eveliina Salonen",   ini:"ES",  div:"FPO", rating:992,  wins:0, top5:0, events:0, total:0,  avg:0.0  },
+  { id:49, name:"Natalie Ryan",       ini:"NR",  div:"FPO", rating:983,  wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:50, name:"Madison Walker",     ini:"MW",  div:"FPO", rating:980,  wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:51, name:"Reid Frescura",      ini:"RF",  div:"MPO", rating:1027, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:52, name:"Gregg Barsby",       ini:"GB2", div:"MPO", rating:1030, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:53, name:"Paul McFlurry",      ini:"PM2", div:"MPO", rating:1023, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:54, name:"Bradley Williams",   ini:"BW",  div:"MPO", rating:1025, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:55, name:"Thomas Gilbert",     ini:"TG",  div:"MPO", rating:1022, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:56, name:"Chris Clemons Jr",   ini:"CC2", div:"MPO", rating:1020, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:57, name:"Nathan Queen",       ini:"NQ",  div:"MPO", rating:1018, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:58, name:"Jordan Castro",      ini:"JCa", div:"MPO", rating:1017, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:59, name:"Eric Oakley",        ini:"EO",  div:"MPO", rating:1028, wins:0, top5:0, events:0, total:0,   avg:0.0  },
+  { id:60, name:"Terry Rothlisberger",ini:"TR",  div:"MPO", rating:1016, wins:0, top5:0, events:0, total:0,   avg:0.0  },
 ];
 
 // CPU team names (up to 29 possible CPU teams)
 const CPU_TEAMS = [
-  "Ace Hunters", "Hyzer Heroes", "Chain Gang", "Birdie Bandits",
+  "Ace Hunters", "Hyzer Heroes", "Disc Warriors", "Birdie Bandits",
   "Disc Destroyers", "Turbo Putters", "Sky Gods", "Mando Breakers",
-  "Feldberg's Flock", "McBeast Mode", "Hyzer Bomb Squad", "Roller Derby",
-  "Birdies & Bogeys", "The Spike Hyzer Gang", "Disc Jockeys", "Eagle Chasers",
-  "Chain Rattle Crew", "The Forehand Files", "Par Breakers", "Anny Away",
+  "Warrior Nation", "Conquest Squad", "Hyzer Bomb Squad", "Roller Derby",
+  "Birdies & Bogeys", "Spike Hyzer Gang", "Disc Jockeys", "Eagle Chasers",
+  "Iron Disc Crew", "The Forehand Files", "Par Breakers", "Anny Away",
   "Hyzer Flip Kings", "The Understables", "Skip Shot Society", "Roller Coasters",
-  "OB Risk Takers", "The Misflight Crew", "Birdie or Bust", "Sidearm Saints",
+  "OB Risk Takers", "Shield & Disc", "Birdie or Bust", "Sidearm Saints",
   "Full Flight Fanatics",
 ];
 
@@ -164,9 +194,9 @@ const NavBar = ({ leagueName, onMenu, onHome }) => (
     <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }} onClick={onHome}>
       <div style={{
         width: 36, height: 36, borderRadius: 8,
-        background: "linear-gradient(135deg, #3d7a3d, #c9a84c)",
+        background: "linear-gradient(135deg, #0A1D36, #D4AF37)",
         display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
-      }}>⚔️</div>
+      }}>🛡️</div>
       <span style={{ color: "#fff", fontWeight: 700, fontSize: 16, fontFamily: "'Georgia',serif" }}>
         {leagueName}
       </span>
@@ -194,7 +224,7 @@ const SideDrawer = ({ open, onClose, setPage }) => {
       <div style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: 260, background: T.card, overflowY: "auto", boxShadow: "-4px 0 20px rgba(0,0,0,0.2)" }}>
         <div style={{ background: T.darkGreen, padding: "20px 16px 16px" }}>
           <div style={{ color: "#fff", fontWeight: 800, fontSize: 18, fontFamily: "'Georgia',serif" }}>⚔️ More</div>
-          <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, marginTop: 2 }}>Chain Masters Pro</div>
+          <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, marginTop: 2 }}>Warrior Fantasy DG</div>
         </div>
         {extras.map(e => (
           <button key={e.id} onClick={() => { setPage(e.id); onClose(); }} style={{
@@ -428,9 +458,9 @@ function LandingPage({ onLeagueCreated }) {
   return (
     <div style={{ minHeight: "100vh", background: T.darkGreen, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24 }}>
       <div style={{ textAlign: "center", marginBottom: 36 }}>
-        <div style={{ fontSize: 72, marginBottom: 12 }}>⚔️</div>
-        <h1 style={{ color: "#fff", fontSize: 34, fontFamily: "'Georgia',serif", margin: "0 0 8px" }}>Chain Masters Pro</h1>
-        <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 15, margin: 0 }}>Fantasy Disc Golf Pro Tour 2026</p>
+        <div style={{ fontSize: 72, marginBottom: 12 }}>🛡️</div>
+        <h1 style={{ color: "#fff", fontSize: 34, fontFamily: "'Georgia',serif", margin: "0 0 8px" }}>Warrior Fantasy DG</h1>
+        <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 15, margin: 0 }}>Draft. Compete. Conquer.</p>
       </div>
       <Card style={{ width: "100%", maxWidth: 380, marginBottom: 16 }}>
         <p style={{ fontSize: 12, fontWeight: 700, color: T.green, letterSpacing: 1, marginTop: 0 }}>SCORING RULES</p>
@@ -856,7 +886,7 @@ function DraftRoom({ league, onDraftComplete, onCpuTeamsReady }) {
               </div>
             )}
             <div style={{ textAlign: "right" }}>
-              <div style={{ color: T.accent, fontWeight: 700, fontSize: 13 }}>{isMyPick ? "YOUR PICK" : `${cpuTeams[teamIndex - 1]} picking...`}</div>
+              <div style={{ color: T.accent, fontWeight: 800, fontSize: 13 }}>{isMyPick ? "YOUR PICK" : `${cpuTeams[teamIndex - 1]} picking...`}</div>
               <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 11 }}>My roster: {myRoster.length}/{ROSTER_LIMIT}</div>
             </div>
           </div>
@@ -992,7 +1022,8 @@ function HomePage({ league, setPage }) {
   return (
     <div style={{ padding: "20px 16px 100px" }}>
       <h1 style={{ fontFamily: "'Georgia',serif", fontSize: 28, margin: "0 0 2px" }}>{leagueName}</h1>
-      <p style={{ color: T.subtext, margin: "0 0 18px", fontSize: 14 }}>Fantasy Disc Golf Pro Tour 2026</p>
+      <p style={{ color: T.subtext, margin: "0 0 4px", fontSize: 14 }}>Fantasy Disc Golf Pro Tour 2027</p>
+        <p style={{ color: T.subtext, margin: "0 0 18px", fontSize: 12, fontStyle: 'italic' }}>Draft. Compete. Conquer.</p>
 
       {/* Stats grid */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
@@ -1337,22 +1368,13 @@ function WaiversPage({ league, waiverPool, onClaim, onDrop, onPlayerClick }) {
 // Championship / Finals = USDGC.
 
 const SEASON_CUTOFF_EVENT = "USDGC"; // fantasy season ends after this event
-const FINALS_EVENT = { name: "USDGC", location: "Rock Hill, SC", dates: "Oct 8–11", tier: "Major" };
-// Events that count toward regular season (everything up to and including USDGC)
-const REGULAR_SEASON_EVENTS = [
-  ...COMPLETED,
-  { name: "Northwest Championship", location: "Portland, OR", dates: "Jun 4–7" },
-  { name: "European Open", location: "Tallinn, Estonia", dates: "Jun 18–21" },
-  { name: "Swedish Open", location: "Borås, Sweden", dates: "Jun 26–28" },
-  { name: "Ledgestone Open", location: "Peoria, IL", dates: "Jul 30–Aug 2" },
-  { name: "PDGA Pro Worlds", location: "Milford, MI", dates: "Aug 26–30" },
-  // USDGC = Championship Finals — included as last regular season event
-  { name: "USDGC (Championship Finals)", location: "Rock Hill, SC", dates: "Oct 8–11" },
-];
-// Powerball Cup comes after USDGC — not counted in fantasy season
-const POST_SEASON_EVENTS = [
-  { name: "Powerball Cup", location: "Lynchburg, VA", dates: "Oct 15–18" },
-];
+const FINALS_EVENT = { name: "USDGC", location: "Rock Hill, SC", dates: "Oct 7–10", tier: "Major" };
+// Regular season = all UPCOMING events up to and including USDGC
+const REGULAR_SEASON_EVENTS = UPCOMING.map(e =>
+  e.name === "USDGC" ? { ...e, name: "USDGC (Championship Finals)" } : e
+);
+// Post season — not counted in fantasy
+const POST_SEASON_EVENTS = POST_SEASON_2027;
 
 function StandingsPage({ league, cpuTeams = [] }) {
   const [sort, setSort] = useState("Record");
@@ -1401,14 +1423,14 @@ function StandingsPage({ league, cpuTeams = [] }) {
   return (
     <div style={{ padding: "20px 16px 100px" }}>
       <h1 style={{ fontFamily: "'Georgia',serif", fontSize: 28, margin: "0 0 2px" }}>Standings</h1>
-      <p style={{ color: T.subtext, margin: "0 0 14px", fontSize: 14 }}>{leagueName} · Season 2026</p>
+      <p style={{ color: T.subtext, margin: "0 0 14px", fontSize: 14 }}>{leagueName} · Season 2027</p>
 
       {/* Season cutoff notice */}
       <div style={{ background: "linear-gradient(135deg, #1a2e1a, #2d5a2d)", borderRadius: 14, padding: "12px 16px", marginBottom: 14, display: "flex", gap: 12, alignItems: "center" }}>
         <span style={{ fontSize: 24 }}>🏆</span>
         <div>
           <div style={{ color: T.accent, fontWeight: 700, fontSize: 12, letterSpacing: 1 }}>CHAMPIONSHIP FINALS</div>
-          <div style={{ color: "#fff", fontWeight: 700, fontSize: 15 }}>USDGC · Oct 8–11 · Rock Hill, SC</div>
+          <div style={{ color: "#fff", fontWeight: 700, fontSize: 15 }}>USDGC · Oct 7–10 · Rock Hill, SC</div>
           <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, marginTop: 2 }}>Fantasy season ends after USDGC. Powerball Cup not included.</div>
         </div>
       </div>
@@ -1595,7 +1617,7 @@ function StandingsPage({ league, cpuTeams = [] }) {
 function TradesPage({ league }) {
   const [tab, setTab] = useState("Propose");
   const tabs = ["Propose", "Incoming", "Outgoing", "History"];
-  const inviteCode = "CHAIN26";
+  const inviteCode = "WARRIOR";
 
   return (
     <div style={{ padding: "20px 16px 100px" }}>
@@ -2219,7 +2241,7 @@ function BracketPage({ league, cpuTeams }) {
         <div>
           <div style={{ fontWeight: 700, fontSize: 15 }}>Championship Finals</div>
           <div style={{ opacity: 0.7, fontSize: 13 }}>USDGC · Rock Hill, SC · Oct 8–11</div>
-          <div style={{ opacity: 0.5, fontSize: 12, marginTop: 2 }}>Winner is crowned Chain Masters Champion</div>
+          <div style={{ opacity: 0.5, fontSize: 12, marginTop: 2 }}>Winner is crowned Warrior Fantasy DG Champion</div>
         </div>
       </div>
 
